@@ -1,37 +1,46 @@
-import json
+from config import *
 
-import psycopg2
-
-from config import config
+from utils import *
 
 
 def main():
-    script_file = 'fill_db.sql'
-    json_file = 'suppliers.json'
-    db_name = 'my_new_db'
+    """ Execution main script"""
 
+    # Getting parametres for connection with database
     params = config()
-    conn = None
 
+    # Creating database
     create_database(params, db_name)
-    print(f"БД {db_name} успешно создана")
+    print(f"Database {db_name} created successfully")
 
+    # Adding new database as constanta to parameters
     params.update({'dbname': db_name})
+
     try:
+        # Connection to new database
         with psycopg2.connect(**params) as conn:
+
+            # Creating cursor
             with conn.cursor() as cur:
+
+                # Fill in database
                 execute_sql_script(cur, script_file)
-                print(f"БД {db_name} успешно заполнена")
+                print(f"Database {db_name} filled successfully")
 
+                # Create table supplier
                 create_suppliers_table(cur)
-                print("Таблица suppliers успешно создана")
+                print("Table suppliers created successfully")
 
+                # Get list of dicts from json_file
                 suppliers = get_suppliers_data(json_file)
-                insert_suppliers_data(cur, suppliers)
-                print("Данные в suppliers успешно добавлены")
 
+                # Add data from json_file to the table suppliers
+                insert_suppliers_data(cur, suppliers)
+                print("Data added successfully to the table suppliers")
+
+                # Adding foreign key to the table products with reference supplier_id to the table suppliers
                 add_foreign_keys(cur, json_file)
-                print(f"FOREIGN KEY успешно добавлены")
+                print(f"FOREIGN KEY added successfully")
 
     except(Exception, psycopg2.DatabaseError) as error:
         print(error)
@@ -40,34 +49,6 @@ def main():
             conn.close()
 
 
-def create_database(params, db_name) -> None:
-    """Создает новую базу данных."""
-    pass
-
-def execute_sql_script(cur, script_file) -> None:
-    """Выполняет скрипт из файла для заполнения БД данными."""
-
-
-
-def create_suppliers_table(cur) -> None:
-    """Создает таблицу suppliers."""
-    pass
-
-
-def get_suppliers_data(json_file: str) -> list[dict]:
-    """Извлекает данные о поставщиках из JSON-файла и возвращает список словарей с соответствующей информацией."""
-    pass
-
-
-def insert_suppliers_data(cur, suppliers: list[dict]) -> None:
-    """Добавляет данные из suppliers в таблицу suppliers."""
-    pass
-
-
-def add_foreign_keys(cur, json_file) -> None:
-    """Добавляет foreign key со ссылкой на supplier_id в таблицу products."""
-    pass
-
-
 if __name__ == '__main__':
+    # Running script
     main()
