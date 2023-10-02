@@ -1,5 +1,10 @@
 from configparser import ConfigParser
 
+# Constanta with sql_database, json_file and name of database
+script_file = 'fill_db.sql'
+json_file = 'suppliers.json'
+db_name = 'my_new_db'
+
 
 def config(filename="database.ini", section="postgresql"):
     # create a parser
